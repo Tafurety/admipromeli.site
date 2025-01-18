@@ -5,87 +5,114 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Información de Pago</title>
   <style>
-    body {
-      font-family: sans-serif; 
-    }
-
-    .container {
-      width: 50%;
-      margin: 0 auto;
-      border: 1px solid #ccc;
-      padding: 20px;
-    }
-
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .data-row {
-      margin-bottom: 10px;
-    }
-
-    .label {
-      font-weight: bold;
-      display: inline-block;
-      width: 150px;
-    }
-
-    .value {
-      display: inline-block;
-    }
+    /* ... (Estilos CSS) ... */ 
   </style>
 </head>
 <body>
 
-<div class="container">
-  <h2>Información de Pago</h2>
+  <a href="https://auth.mercadolibre.com.ar/authorization?response_type=code&client_id=TU_APP_ID&redirect_uri=https://admipromeli.site">Iniciar sesión con Mercado Libre</a>
 
-  <section>
-    <article class="data-row">
-      <span class="label">Monto total:</span>
-      <span class="value">250000</span>
-    </article>
+  <div id="informacion-venta" style="display: none;"> 
+    <div class="container">
+      <h2>Información de Pago</h2>
+    
+      <section>
+        <article class="data-row">
+          <span class="label">Monto total:</span>
+          <span class="value">250000</span>
+        </article>
+    
+        <article class="data-row">
+          <span class="label">Token:</span>
+          <span class="value">ff808081878e9c8f01879406c8d87e55</span>
+        </article>
+    
+        <article class="data-row">
+          <span class="label">Descripción:</span>
+          <span class="value">Compra en Fashionista - Camisa y pantalón</span>
+        </article>
+    
+        <article class="data-row">
+          <span class="label">Cuotas:</span>
+          <span class="value">1</span>
+        </article>
+    
+        <article class="data-row">
+          <span class="label">Método de pago:</span>
+          <span class="value">visa</span>
+        </article>
+      </section>
+    
+      <section>
+        <article class="data-row">
+          <span class="label">Email del comprador:</span>
+          <span class="value">test_user_12345678@testuser.com</span>
+        </article>
+    
+        <article class="data-row">
+          <span class="label">Tipo de documento:</span>
+          <span class="value">CC</span>
+        </article>
+    
+        <article class="data-row">
+          <span class="label">Número de documento:</span>
+          <span class="value">123456789</span>
+        </article>
+      </section>
+    
+    </div>
+  </div>
 
-    <article class="data-row">
-      <span class="label">Token:</span>
-      <span class="value">ff808081878e9c8f01879406c8d87e55</span>
-    </article>
+  <script>
+    // 1. Obtener el código de autorización de la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
 
-    <article class="data-row">
-      <span class="label">Descripción:</span>
-      <span class="value">Compra en Fashionista - Camisa y pantalón</span>
-    </article>
+    // 2. Si hay un código, obtener el token de acceso
+    if (code) {
+      // Reemplaza con tu APP_ID y APP_SECRET
+      const clientId = 'TU_APP_ID'; 
+      const clientSecret = 'TU_APP_SECRET';
 
-    <article class="data-row">
-      <span class="label">Cuotas:</span>
-      <span class="value">1</span>
-    </article>
+      fetch('https://api.mercadolibre.com/oauth/token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams({
+          'grant_type': 'authorization_code',
+          'client_id': clientId,
+          'client_secret': clientSecret,
+          'code': code,
+          'redirect_uri': 'https://admipromeli.site' 
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        // 3. Guardar el token de acceso en el almacenamiento local
+        localStorage.setItem('access_token', data.access_token); 
+        
+        // 4. Mostrar la información de la venta
+        mostrarInformacionVenta(); 
+      })
+      .catch(error => {
+        console.error('Error al obtener el token:', error); 
+      });
+    } else {
+      // Si no hay código, verificar si hay un token almacenado
+      mostrarInformacionVenta(); 
+    }
 
-    <article class="data-row">
-      <span class="label">Método de pago:</span>
-      <span class="value">visa</span>
-    </article>
-  </section>
-
-  <section>
-    <article class="data-row">
-      <span class="label">Email del comprador:</span>
-      <span class="value">test_user_12345678@testuser.com</span>
-    </article>
-
-    <article class="data-row">
-      <span class="label">Tipo de documento:</span>
-      <span class="value">CC</span>
-    </article>
-
-    <article class="data-row">
-      <span class="label">Número de documento:</span>
-      <span class="value">123456789</span>
-    </article>
-  </section>
-
-</div>
-
+    function mostrarInformacionVenta() {
+      const accessToken = localStorage.getItem('access_token');
+      if (accessToken) {
+        // El usuario está autenticado, mostrar la información
+        document.getElementById('informacion-venta').style.display = 'block'; 
+      } else {
+        // El usuario no está autenticado, ocultar la información
+        document.getElementById('informacion-venta').style.display = 'none'; 
+      }
+    }
+  </script>
 </body>
 </html>
